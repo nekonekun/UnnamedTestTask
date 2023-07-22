@@ -1,0 +1,43 @@
+version: '3.7'
+services:
+  postgres:
+    image: postgres:14.0
+    hostname: postgres
+    env_file:
+      - .env
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+  redis:
+    image: redis
+    hostname: cache
+    ports:
+      - "6379:6379"
+    networks:
+      - app-network
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    hostname: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - app-network
+  app:
+    build: .
+    command: bash -c "poetry run digest-db upgrade head && poetry run digest"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - app-network
+    env_file:
+      - .env
+networks:
+  app-network:

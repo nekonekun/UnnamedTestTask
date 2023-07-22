@@ -29,13 +29,13 @@ group.add_argument(
     '--postgres-username',
     help='Postgres username',
     metavar='user',
-    default=os.environ.get('DIGEST_POSTGRES_USERNAME'),
+    default=os.environ.get('POSTGRES_USER'),
 )
 group.add_argument(
     '--postgres-password',
     help='Postgres password',
     metavar='pass',
-    default=os.environ.get('DIGEST_POSTGRES_PASSWORD'),
+    default=os.environ.get('POSTGRES_PASSWORD'),
 )
 group.add_argument(
     '--postgres-host',
@@ -53,7 +53,7 @@ group.add_argument(
     '--postgres-database',
     help='Postgres database',
     metavar='db',
-    default=os.environ.get('DIGEST_POSTGRES_DATABASE'),
+    default=os.environ.get('POSTGRES_DB'),
 )
 
 group = parser.add_argument_group('RabbitMQ')

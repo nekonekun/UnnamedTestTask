@@ -14,13 +14,13 @@ def main():
         '--postgres-username',
         help='Postgres username',
         metavar='user',
-        default=os.environ.get('DIGEST_POSTGRES_USERNAME'),
+        default=os.environ.get('POSTGRES_USER'),
     )
     alembic.parser.add_argument(
         '--postgres-password',
         help='Postgres password',
         metavar='pass',
-        default=os.environ.get('DIGEST_POSTGRES_PASSWORD'),
+        default=os.environ.get('POSTGRES_PASSWORD'),
     )
     alembic.parser.add_argument(
         '--postgres-host',
@@ -38,7 +38,7 @@ def main():
         '--postgres-database',
         help='Postgres database',
         metavar='db',
-        default=os.environ.get('DIGEST_POSTGRES_DATABASE'),
+        default=os.environ.get('POSTGRES_DB'),
     )
     options = alembic.parser.parse_args()
     username = options.postgres_username
