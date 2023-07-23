@@ -63,9 +63,7 @@ class Post(Base):
     subscription: Mapped[Subscription] = relationship(viewonly=True)
     content: Mapped[str] = mapped_column()
     popularity: Mapped[int] = mapped_column()
-    digests: Mapped[list['PostDigest']] = relationship(
-        back_populates='posts'
-    )
+    digests: Mapped[list['PostDigest']] = relationship(back_populates='posts')
 
 
 class Digest(Base):
@@ -78,9 +76,7 @@ class Digest(Base):
         ForeignKey('users.id', ondelete='CASCADE'), nullable=False
     )
     user: Mapped[User] = relationship(back_populates='digests')
-    posts: Mapped[list['PostDigest']] = relationship(
-        back_populates='digests'
-    )
+    posts: Mapped[list['PostDigest']] = relationship(back_populates='digests')
 
 
 class PostDigest(Base):

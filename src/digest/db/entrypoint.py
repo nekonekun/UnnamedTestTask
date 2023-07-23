@@ -1,3 +1,4 @@
+"""Alembic decorator."""
 import os
 import sys
 from pathlib import Path
@@ -8,7 +9,7 @@ PROJECT_PATH = Path(__file__).parent.parent.resolve()
 
 
 def main():
-    """Alembic entrypoint"""
+    """Parse arguments and run Alembic."""
     alembic = CommandLine()
     alembic.parser.add_argument(
         '--postgres-username',

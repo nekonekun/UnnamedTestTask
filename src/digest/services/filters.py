@@ -1,12 +1,38 @@
+"""Posts-filtering functions."""
 from digest.schemas import PostDTO
 
 
 def dummy_filter(*posts: PostDTO, limit: int = 5) -> list[int]:
+    """Dummy filter.
+
+    Return top-rated post.
+
+    :param posts: posts to be filtered
+    :type posts: PostDTO
+    :param limit: how many posts should be returned
+    :type limit: int
+    :return: list of chosen Posts IDs
+    """
     result = sorted(posts, key=lambda x: x.popularity, reverse=True)[:limit]
     return [post.id for post in result]
 
 
-def at_least_one_subscription(*posts: PostDTO, limit: int = 5) -> list[int]:
+def at_least_one_subscription(
+        *posts: PostDTO,
+        limit: int = 5
+) -> list[int]:
+    """Semi-smart filter.
+
+    Return top-rated post from each subscription.
+    If number of subscriptions is lower than limit,
+    then add other top-rated posts.
+
+    :param posts: posts to be filtered
+    :type posts: PostDTO
+    :param limit: how many posts should be returned
+    :type limit: int
+    :return: list of chosen Posts IDs
+    """
     result = []
     indexes = []
     included_subscriptions = []

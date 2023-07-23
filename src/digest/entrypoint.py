@@ -1,3 +1,4 @@
+"""Main entrypoint module."""
 import logging
 import os
 from argparse import ArgumentParser
@@ -6,9 +7,7 @@ from collections import defaultdict
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from digest.adapters.database import Gateway
-from digest.adapters.rabbit import RabbitReader
-from digest.adapters.storage import RedisStorage
+from digest.adapters import Gateway, RabbitReader, RedisStorage
 from digest.services.digester import Digester
 from digest.services.filters import at_least_one_subscription
 
@@ -113,6 +112,7 @@ parser.add_argument('--verbose', '-v', action='count', default=0)
 
 
 def main():
+    """Parse arguments, initialize Digester and start flow."""
     args = parser.parse_args()
 
     logger.setLevel(LEVELS[args.verbose])

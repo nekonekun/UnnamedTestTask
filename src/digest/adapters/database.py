@@ -1,9 +1,10 @@
+"""Database adapters."""
 from contextlib import contextmanager
 
 from sqlalchemy import desc, insert, select
 from sqlalchemy.orm import Session, joinedload, selectinload, sessionmaker
 
-from digest.db.models import (
+from digest.db import (
     Digest,
     Post,
     PostDigest,
@@ -14,11 +15,26 @@ from digest.schemas import DigestDTO, PostDTO
 
 
 class RepoBase:
+    """Base adapter class."""
+
     def __init__(self, sessionmaker_: sessionmaker):
+        """Initialize adapter with sessionmaker.
+
+        :param sessionmaker_: sessionmaker instance
+        :type sessionmaker_: sessionmaker
+        """
         self.sessionmaker = sessionmaker_
 
     @contextmanager
     def session_control(self, commit: bool = True, session: Session = None):
+        """Create new Session if not provided.
+
+        :param commit: commits if set to True and Session is not provided
+        :type commit: bool
+        :param session: already opened session. Will be created if not provided
+        :type session: Session
+        :return: Session instance to work with
+        """
         current_session = session if session else self.sessionmaker()
 
         yield current_session
@@ -30,9 +46,19 @@ class RepoBase:
 
 
 class Gateway(RepoBase):
+    """SQL adapter. Works with all used in project tables."""
+
     def read_posts_for_user(
         self, user_id: int, session: Session | None = None
-    ):
+    ) -> list[PostDTO]:
+        """Read posts from user subscriptions.
+
+        :param user_id: target user ID
+        :type user_id: int
+        :param session: session to be passed to session_control
+        :type session: Session
+        :return: list of Posts
+        """
         stmt = select(Post).join(Subscription.posts)
         stmt = stmt.join(UserSubscription)
         stmt = stmt.where(UserSubscription.user_id == user_id)
@@ -44,7 +70,17 @@ class Gateway(RepoBase):
 
     def create_digest(
         self, user_id: int, *post_ids: int, session: Session | None = None
-    ):
+    ) -> DigestDTO | None:
+        """Create and save Digest for given user.
+
+        :param user_id: target user ID
+        :type user_id: int
+        :param post_ids: post IDs to be included in Digest
+        :type post_ids: int
+        :param session: session to be passed to session_control
+        :type session: Session
+        :return: resulting Digest
+        """
         if not post_ids:
             return None
         stmt = insert(Digest).values(user_id=user_id)
@@ -70,7 +106,17 @@ class Gateway(RepoBase):
                 posts=[PostDTO.model_validate(post) for post in posts],
             )
 
-    def read_digest(self, digest_id: int, session: Session | None = None):
+    def read_digest(
+        self, digest_id: int, session: Session | None = None
+    ) -> DigestDTO | None:
+        """Read Digest by id.
+
+        :param digest_id: target digest ID
+        :type digest_id: int
+        :param session: session to be
+        :type session: Session
+        :return: found digest or None
+        """
         stmt = select(PostDigest)
         stmt = stmt.options(joinedload(PostDigest.digests))
         stmt = stmt.where(PostDigest.digest_id == digest_id)
