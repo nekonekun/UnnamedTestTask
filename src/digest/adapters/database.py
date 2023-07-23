@@ -30,13 +30,13 @@ class RepoBase:
 
 
 class Gateway(RepoBase):
-    def read_most_popular_posts_for_user(
-        self, user_id: int, limit: int = 5, session: Session | None = None
+    def read_posts_for_user(
+        self, user_id: int, session: Session | None = None
     ):
         stmt = select(Post).join(Subscription.posts)
         stmt = stmt.join(UserSubscriptionAssociation)
         stmt = stmt.where(UserSubscriptionAssociation.user_id == user_id)
-        stmt = stmt.order_by(desc(Post.popularity)).limit(limit)
+        stmt = stmt.order_by(desc(Post.popularity))
         with self.session_control(commit=False, session=session) as s:
             response = s.execute(stmt)
             posts: list[Post] = response.scalars().all()
@@ -45,6 +45,8 @@ class Gateway(RepoBase):
     def create_digest(
         self, user_id: int, *post_ids: int, session: Session | None = None
     ):
+        if not post_ids:
+            return None
         stmt = insert(Digest).values(user_id=user_id)
         stmt = stmt.returning(Digest).options(selectinload(Digest.posts))
         with self.session_control(commit=True, session=session) as s:
