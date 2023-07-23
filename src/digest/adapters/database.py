@@ -6,9 +6,9 @@ from sqlalchemy.orm import Session, joinedload, selectinload, sessionmaker
 from digest.db.models import (
     Digest,
     Post,
-    PostDigestAssociation,
+    PostDigest,
     Subscription,
-    UserSubscriptionAssociation,
+    UserSubscription,
 )
 from digest.schemas import DigestDTO, PostDTO
 
@@ -34,8 +34,8 @@ class Gateway(RepoBase):
         self, user_id: int, session: Session | None = None
     ):
         stmt = select(Post).join(Subscription.posts)
-        stmt = stmt.join(UserSubscriptionAssociation)
-        stmt = stmt.where(UserSubscriptionAssociation.user_id == user_id)
+        stmt = stmt.join(UserSubscription)
+        stmt = stmt.where(UserSubscription.user_id == user_id)
         stmt = stmt.order_by(desc(Post.popularity))
         with self.session_control(commit=False, session=session) as s:
             response = s.execute(stmt)
@@ -52,7 +52,7 @@ class Gateway(RepoBase):
         with self.session_control(commit=True, session=session) as s:
             response = s.execute(stmt)
             digest_: Digest = response.scalars().first()
-            stmt = insert(PostDigestAssociation).values(
+            stmt = insert(PostDigest).values(
                 [
                     {'post_id': post_id, 'digest_id': digest_.id}
                     for post_id in post_ids
@@ -71,10 +71,10 @@ class Gateway(RepoBase):
             )
 
     def read_digest(self, digest_id: int, session: Session | None = None):
-        stmt = select(PostDigestAssociation)
-        stmt = stmt.options(joinedload(PostDigestAssociation.digests))
-        stmt = stmt.where(PostDigestAssociation.digest_id == digest_id)
-        stmt = stmt.options(joinedload(PostDigestAssociation.posts))
+        stmt = select(PostDigest)
+        stmt = stmt.options(joinedload(PostDigest.digests))
+        stmt = stmt.where(PostDigest.digest_id == digest_id)
+        stmt = stmt.options(joinedload(PostDigest.posts))
         with self.session_control(commit=False, session=session) as s:
             response = s.execute(stmt)
             content = response.scalars().all()
