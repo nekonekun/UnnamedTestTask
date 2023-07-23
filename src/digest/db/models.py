@@ -24,7 +24,7 @@ class User(Base):
     __tablename__ = 'users'
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column()
-    subscriptions: Mapped[list['UserSubscriptionAssociation']] = relationship(
+    subscriptions: Mapped[list['UserSubscription']] = relationship(
         back_populates='users'
     )
     digests: Mapped[list['Digest']] = relationship(back_populates='user')
@@ -34,13 +34,13 @@ class Subscription(Base):
     __tablename__ = 'subscriptions'
     id: Mapped[int] = mapped_column(primary_key=True)
     source: Mapped[str] = mapped_column()
-    users: Mapped[list['UserSubscriptionAssociation']] = relationship(
+    users: Mapped[list['UserSubscription']] = relationship(
         back_populates='subscriptions'
     )
     posts: Mapped[list['Post']] = relationship()
 
 
-class UserSubscriptionAssociation(Base):
+class UserSubscription(Base):
     __tablename__ = 'users_subscriptions'
     user_id: Mapped[int] = mapped_column(
         ForeignKey('users.id'), primary_key=True
@@ -62,10 +62,8 @@ class Post(Base):
     )
     subscription: Mapped[Subscription] = relationship(viewonly=True)
     content: Mapped[str] = mapped_column()
-    popularity: Mapped[int] = mapped_column()
-    digests: Mapped[list['PostDigestAssociation']] = relationship(
-        back_populates='posts'
-    )
+    rating: Mapped[int] = mapped_column()
+    digests: Mapped[list['PostDigest']] = relationship(back_populates='posts')
 
 
 class Digest(Base):
@@ -78,12 +76,10 @@ class Digest(Base):
         ForeignKey('users.id', ondelete='CASCADE'), nullable=False
     )
     user: Mapped[User] = relationship(back_populates='digests')
-    posts: Mapped[list['PostDigestAssociation']] = relationship(
-        back_populates='digests'
-    )
+    posts: Mapped[list['PostDigest']] = relationship(back_populates='digests')
 
 
-class PostDigestAssociation(Base):
+class PostDigest(Base):
     __tablename__ = 'posts_digests'
     post_id: Mapped[int] = mapped_column(
         ForeignKey('posts.id'), primary_key=True

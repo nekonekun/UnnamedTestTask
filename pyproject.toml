@@ -35,4 +35,5 @@ digest-db = "digest.db.entrypoint:main"
 digest = "digest.entrypoint:main"
 
 [tool.ruff]
-select = ["F", "E", "W", "R", "C", "B", "I", "N", "UP", "SIM", "RUF"]
+select = ["F", "E", "W", "R", "C", "B", "I", "N", "UP", "SIM", "RUF", "D"]
+exclude = ["src/digest/db/models.py", "src/digest/db/alembic"]
