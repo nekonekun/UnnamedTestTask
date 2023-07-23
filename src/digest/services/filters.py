@@ -34,6 +34,7 @@ def at_least_one_subscription(
     result = []
     indexes = []
     included_subscriptions = []
+
     posts = sorted(posts, key=lambda x: x.rating, reverse=True)
     for index, post in enumerate(posts):
         if len(result) >= limit:
