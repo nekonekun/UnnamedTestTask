@@ -25,9 +25,7 @@ class Digester:
 
     def make_digest(self, user_id: int, limit: int = 5) -> DigestDTO:
         """Filter posts and compose digest"""
-        posts = self.gateway.read_most_popular_posts_for_user(
-            user_id, limit * 10
-        )
+        posts = self.gateway.read_posts_for_user(user_id)
         post_ids = self.compose_function(*posts, limit=limit)
         return self.gateway.create_digest(user_id, *post_ids)
 
@@ -55,6 +53,4 @@ class Digester:
         """Start digester process"""
         logger.error('Start listening')
         for user_id in self.rabbit_reader.message_generator():
-            if user_id == '-1':
-                return
             self.flow(user_id)
