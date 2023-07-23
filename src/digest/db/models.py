@@ -62,7 +62,7 @@ class Post(Base):
     )
     subscription: Mapped[Subscription] = relationship(viewonly=True)
     content: Mapped[str] = mapped_column()
-    popularity: Mapped[int] = mapped_column()
+    rating: Mapped[int] = mapped_column()
     digests: Mapped[list['PostDigest']] = relationship(back_populates='posts')
 
 

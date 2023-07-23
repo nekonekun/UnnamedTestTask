@@ -62,7 +62,7 @@ class Gateway(RepoBase):
         stmt = select(Post).join(Subscription.posts)
         stmt = stmt.join(UserSubscription)
         stmt = stmt.where(UserSubscription.user_id == user_id)
-        stmt = stmt.order_by(desc(Post.popularity))
+        stmt = stmt.order_by(desc(Post.rating))
         with self.session_control(commit=False, session=session) as s:
             response = s.execute(stmt)
             posts: list[Post] = response.scalars().all()

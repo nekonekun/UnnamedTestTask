@@ -3,9 +3,7 @@ from digest.schemas import PostDTO
 
 
 def dummy_filter(*posts: PostDTO, limit: int = 5) -> list[int]:
-    """Dummy filter.
-
-    Return top-rated post.
+    """Filter posts by rating.
 
     :param posts: posts to be filtered
     :type posts: PostDTO
@@ -13,7 +11,7 @@ def dummy_filter(*posts: PostDTO, limit: int = 5) -> list[int]:
     :type limit: int
     :return: list of chosen Posts IDs
     """
-    result = sorted(posts, key=lambda x: x.popularity, reverse=True)[:limit]
+    result = sorted(posts, key=lambda x: x.rating, reverse=True)[:limit]
     return [post.id for post in result]
 
 
@@ -36,7 +34,7 @@ def at_least_one_subscription(
     result = []
     indexes = []
     included_subscriptions = []
-    posts = sorted(posts, key=lambda x: x.popularity, reverse=True)
+    posts = sorted(posts, key=lambda x: x.rating, reverse=True)
     for index, post in enumerate(posts):
         if len(result) >= limit:
             break

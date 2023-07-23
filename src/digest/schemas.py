@@ -12,7 +12,7 @@ class PostDTO(BaseModel):
     id: int
     subscription_id: int
     content: str
-    popularity: int
+    rating: int
 
 
 class DigestDTO(BaseModel):
