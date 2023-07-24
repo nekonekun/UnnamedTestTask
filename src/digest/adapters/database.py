@@ -6,10 +6,10 @@ from sqlalchemy.orm import Session, selectinload, sessionmaker
 
 from digest.db import (
     Digest,
+    Post,
     PostDigest,
     Subscription,
     UserSubscription,
-    Post,
 )
 from digest.schemas import DigestDTO, PostDTO
 

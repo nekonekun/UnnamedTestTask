@@ -15,10 +15,7 @@ def dummy_filter(*posts: PostDTO, limit: int = 5) -> list[int]:
     return [post.id for post in result]
 
 
-def at_least_one_subscription(
-        *posts: PostDTO,
-        limit: int = 5
-) -> list[int]:
+def at_least_one_subscription(*posts: PostDTO, limit: int = 5) -> list[int]:
     """Semi-smart filter.
 
     Return top-rated post from each subscription.
