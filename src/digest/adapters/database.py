@@ -1,15 +1,15 @@
 """Database adapters."""
 from contextlib import contextmanager
 
-from sqlalchemy import desc, insert, select
-from sqlalchemy.orm import Session, joinedload, selectinload, sessionmaker
+from sqlalchemy import insert, select
+from sqlalchemy.orm import Session, selectinload, sessionmaker
 
 from digest.db import (
     Digest,
-    Post,
     PostDigest,
     Subscription,
     UserSubscription,
+    Post,
 )
 from digest.schemas import DigestDTO, PostDTO
 
@@ -46,7 +46,7 @@ class RepoBase:
 
 
 class Gateway(RepoBase):
-    """SQL adapter. Works with all used in project tables."""
+    """Database adapter. Works with all used in project tables."""
 
     def read_posts_for_user(
         self, user_id: int, session: Session | None = None
@@ -59,10 +59,9 @@ class Gateway(RepoBase):
         :type session: Session
         :return: list of Posts
         """
-        stmt = select(Post).join(Subscription.posts)
-        stmt = stmt.join(UserSubscription)
+        stmt = select(Post).join(Subscription).join(UserSubscription)
+        stmt = stmt.where(Subscription.id == Post.subscription_id)
         stmt = stmt.where(UserSubscription.user_id == user_id)
-        stmt = stmt.order_by(desc(Post.rating))
         with self.session_control(commit=False, session=session) as s:
             response = s.execute(stmt)
             posts: list[Post] = response.scalars().all()
@@ -84,7 +83,7 @@ class Gateway(RepoBase):
         if not post_ids:
             return None
         stmt = insert(Digest).values(user_id=user_id)
-        stmt = stmt.returning(Digest).options(selectinload(Digest.posts))
+        stmt = stmt.returning(Digest)
         with self.session_control(commit=True, session=session) as s:
             response = s.execute(stmt)
             digest_: Digest = response.scalars().first()
@@ -96,15 +95,7 @@ class Gateway(RepoBase):
             )
             s.execute(stmt)
             s.refresh(digest_)
-            stmt = select(Post).where(Post.id.in_(post_ids))
-            response = s.execute(stmt)
-            posts = response.scalars().all()
-            return DigestDTO(
-                id=digest_.id,
-                user_id=digest_.user_id,
-                timestamp=digest_.timestamp,
-                posts=[PostDTO.model_validate(post) for post in posts],
-            )
+            return DigestDTO.model_validate(digest_)
 
     def read_digest(
         self, digest_id: int, session: Session | None = None
@@ -117,23 +108,12 @@ class Gateway(RepoBase):
         :type session: Session
         :return: found digest or None
         """
-        stmt = select(PostDigest)
-        stmt = stmt.options(joinedload(PostDigest.digests))
-        stmt = stmt.where(PostDigest.digest_id == digest_id)
-        stmt = stmt.options(joinedload(PostDigest.posts))
+        stmt = select(Digest)
+        stmt = stmt.where(Digest.id == digest_id)
+        stmt = stmt.options(selectinload(Digest.posts))
         with self.session_control(commit=False, session=session) as s:
             response = s.execute(stmt)
-            content = response.scalars().all()
+            content: Digest = response.scalars().first()
             if content:
-                response = DigestDTO(
-                    id=content[0].digests.id,
-                    user_id=content[0].digests.user_id,
-                    timestamp=content[0].digests.timestamp,
-                    posts=[
-                        PostDTO.model_validate(entry.posts)
-                        for entry in content
-                    ],
-                )
-            else:
-                response = None
-        return response
+                return DigestDTO.model_validate(content)
+            return None
