@@ -8,4 +8,11 @@ from digest.db.models import (
     UserSubscription,
 )
 
-__all__ = ('Digest', 'Post', 'PostDigest', 'Subscription', 'User', 'UserSubscription')
+__all__ = (
+    'Digest',
+    'Post',
+    'PostDigest',
+    'Subscription',
+    'User',
+    'UserSubscription',
+)
