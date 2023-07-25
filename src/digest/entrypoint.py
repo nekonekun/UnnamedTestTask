@@ -153,5 +153,5 @@ def main():
         gateway, rabbit_reader, redis_storage, compose_function
     )
 
-    logger.error('Starting main method')
+    logger.info('Starting main method')
     digester()
