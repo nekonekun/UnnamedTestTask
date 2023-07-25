@@ -1,5 +1,4 @@
 import pytest
-import os
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine, text
 from digest.adapters.database import Gateway
@@ -7,19 +6,25 @@ from digest.adapters.storage import RedisStorage
 from digest.adapters.rabbit import RabbitReader
 from digest.services.digester import Digester
 from digest.services.filters import dummy_filter
+from digest.entrypoint import Settings
 
 
 @pytest.fixture(scope='session')
-def sessionmaker_():
-    username = os.environ.get('POSTGRES_USER')
-    password = os.environ.get('POSTGRES_PASSWORD')
-    host = os.environ.get('DIGEST_POSTGRES_HOST', 'localhost')
-    port = os.environ.get('DIGEST_POSTGRES_PORT', 5432)
-    db = os.environ.get('POSTGRES_DB')
-    postgres_url = (
-        f'postgresql+psycopg2://{username}:{password}@{host}:{port}/{db}'
-    )
-    engine = create_engine(postgres_url)
+def settings():
+    return Settings()
+
+
+@pytest.fixture(scope='session')
+def sessionmaker_(settings):
+    # username = os.environ.get('POSTGRES_USER')
+    # password = os.environ.get('POSTGRES_PASSWORD')
+    # host = os.environ.get('DIGEST_POSTGRES_HOST', 'localhost')
+    # port = os.environ.get('DIGEST_POSTGRES_PORT', 5432)
+    # db = os.environ.get('POSTGRES_DB')
+    # postgres_url = (
+    #     f'postgresql+psycopg2://{username}:{password}@{host}:{port}/{db}'
+    # )
+    engine = create_engine(settings.database_url)
     return sessionmaker(engine, expire_on_commit=False)
 
 
@@ -55,22 +60,17 @@ def gateway(sessionmaker_):
 
 
 @pytest.fixture
-def redis_client():
-    host = os.environ.get('DIGEST_REDIS_HOST', 'localhost')
-    port = os.environ.get('DIGEST_REDIS_PORT', 6379)
-    db = os.environ.get('DIGEST_REDIS_DB', '0')
-    storage = RedisStorage(host, port, db)
-    storage.client.delete(1, 2, 3)
-    return RedisStorage(host, port, db)
+def redis_client(settings):
+    return RedisStorage(settings.redis_url)
 
 
 @pytest.fixture
-def rabbit_reader():
-    host = os.environ.get('DIGEST_RABBIT_HOST', 'localhost')
-    port = os.environ.get('DIGEST_RABBIT_PORT', 5672)
-    username = os.environ.get('DIGEST_RABBIT_USERNAME')
-    password = os.environ.get('DIGEST_RABBIT_PASSWORD')
-    queue = os.environ.get('DIGEST_RABBIT_QUEUE')
+def rabbit_reader(settings):
+    host = settings.rabbit_host
+    port = settings.rabbit_port
+    username = settings.rabbit_username
+    password = settings.rabbit_password
+    queue = settings.rabbit_queue
     return RabbitReader(queue, host, port, username, password)
 
 

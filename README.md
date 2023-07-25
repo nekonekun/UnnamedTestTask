@@ -9,7 +9,7 @@ Task description available [here](docs/TaskDescription.md)
 I assume that posts from different sources are stored in database
 1. Script continuously reads user IDs from rabbit.
 2. After receiving a new user ID, script reads all posts from user subscriptions.
-3. Then script composes digest based on post popularity, but tries to include at least one post of every subscription.
+3. Then script composes digest based on post rating, but tries to include at least one post of every subscription.
 4. Then script saves digest to database, and saves digest to Redis with user ID as key.
 ### Database schema
 ###### User
@@ -28,7 +28,7 @@ I assume that posts from different sources are stored in database
  - id
  - subscription_id (ForeignKey on `Subscription.id`)
  - content
- - popularity
+ - rating
 
 ###### Digest
  - id

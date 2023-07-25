@@ -9,19 +9,13 @@ logger = logging.getLogger('digest.redis')
 class RedisStorage:
     """Redis adapter."""
 
-    def __init__(self, host: str = 'localhost', port: int = 6379, db: int = 0):
+    def __init__(self, url: str):
         """Initialize Redis client.
 
-        :param host: hostname
-        :type host: str
-        :param port: port
-        :type port: int
-        :param db: database number
-        :type db: int
+        :param url: Redis Url
+        :type url: str
         """
-        self.client = redis.Redis(
-            host=host, port=port, db=db, decode_responses=True
-        )
+        self.client = redis.Redis.from_url(url, decode_responses=True)
 
     def store(self, user_id: int, data: str):
         """Store data to Redis.

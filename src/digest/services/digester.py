@@ -96,6 +96,6 @@ class Digester:
 
         Listen to RabbitMQ, and apply flow to every user ID.
         """
-        logger.error('Start listening')
+        logger.info('Start listening')
         for user_id in self.rabbit_reader.message_generator():
             self.flow(user_id)
